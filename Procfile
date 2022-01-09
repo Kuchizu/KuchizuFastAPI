@@ -1,1 +1,1 @@
-web: uvicorn Kuchizu:app
+web: gunicorn Kuchizu:app
