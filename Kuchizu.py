@@ -20,6 +20,6 @@ app = FastAPI()
 async def root():
     return {'Neko': choice(cats)}
 
-# @app.get('/favicon.ico')
-# async def icon():
-#     return FileResponse('Kuchizu.ico')
+@app.get('/favicon.ico')
+async def icon():
+    return FileResponse('Kuchizu.ico')

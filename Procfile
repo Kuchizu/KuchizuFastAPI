@@ -1,1 +1,1 @@
-web: gunicorn Kuchizu:app
+web: gunicorn -k uvicorn.workers.UvicornWorker Kuchizu:app
