@@ -24,6 +24,6 @@ async def root():
 async def icon():
     return FileResponse('Kuchizu.ico')
 
-@app.get('/pico')
+@app.get('/Pico.m4a')
 async def icon():
     return FileResponse('Boku no pico.m4a')
