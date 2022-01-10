@@ -23,3 +23,7 @@ async def root():
 @app.get('/favicon.ico')
 async def icon():
     return FileResponse('Kuchizu.ico')
+
+@app.get('/pico')
+async def icon():
+    return FileResponse('Boku no pico.m4a')
