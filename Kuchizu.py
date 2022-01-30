@@ -7,7 +7,7 @@ from starlette.exceptions import HTTPException
 
 logging.basicConfig(level=logging.INFO)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-with open('files/Cats.txt', encoding = 'UTF-8') as f:
+with open('files/Nekos.txt', encoding = 'UTF-8') as f:
     cats = f.read().split()
 
 app = FastAPI()
