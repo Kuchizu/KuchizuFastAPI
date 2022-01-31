@@ -30,21 +30,47 @@ async def icon():
     return FileResponse('icons/Kuchizu.ico')
 
 @app.get('/files')
-async def get_files(request: Request):
+async def list_files(request: Request):
     html = f"Founded {len(next(os.walk('files'))[2])} files:<br><br>"
-    for root, dirs, files in os.walk('files'):
-        for filename in files:
-            html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
-                link = f'{request.url._url}/{filename}',
-                title = filename,
-                filesize = f'{os.path.getsize(os.path.join(root, filename)) / 1024 / 1024:.2f}MB'
+    # for root, dirs, files in os.walk('files'):
+    #     for filename in files:
+    #         html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
+    #             link = f'{request.url._url}/{filename}',
+    #             title = filename,
+    #             filesize = f'{os.path.getsize(os.path.join(root, filename)) / 1024 / 1024:.2f}MB'
+    #         )
+
+    return HTMLResponse(get_files('files')) # Not user 'files', check dir(request) instead.
+
+def get_files(path, req_url) -> str:
+    html = f"Founded {len(next(os.walk(path))[2])} files:<br><br>"
+    # for root, dirs, files in os.walk('files'):
+    #     for filename in files:
+    #         html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
+    #             link = f'{request.url._url}/{filename}',
+    #             title = filename,
+    #             filesize = f'{os.path.getsize(os.path.join(root, filename)) / 1024 / 1024:.2f}MB'
+    #         )
+    for dirname in filter(lambda dir: os.path.isdir(dirname), os.listdir(path)):
+            html += '<a href=\"{link}\">{title}/</a><br>'.format(
+                link = f'{req_url}/{dirname}',
+                title = dirname
             )
-    return HTMLResponse(html)
+    for filename in filter(lambda dir: os.path.isfile(filename), os.listdir(path)):
+            html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
+                link = f'{req_url}/{filename}',
+                title = filename,
+                filesize = f'{os.path.getsize(os.path.join(path, filename)) / 1024 / 1024:.2f}MB'
+            )
+    return html
 
 
 @app.get('/files/{file}')
-async def get_file(file):
-    if os.path.exists(f'files/{file}'):
-        return FileResponse(f'files/{file}')
+async def get_file(file: str, request: Request):
+    if os.path.isdir(f'{request.url._url}/{file}'):
+        pass
     else:
-        return PlainTextResponse('403 Forbidden.')
+        if os.path.exists(f'files/{file}'):
+            return FileResponse(f'files/{file}')
+        else:
+           return PlainTextResponse('403 Forbidden.')
