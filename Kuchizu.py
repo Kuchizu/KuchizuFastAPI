@@ -29,48 +29,30 @@ async def notfound(request, exc):
 async def icon():
     return FileResponse('icons/Kuchizu.ico')
 
-@app.get('/files')
-async def list_files(request: Request):
-    html = f"Founded {len(next(os.walk('files'))[2])} files:<br><br>"
-    # for root, dirs, files in os.walk('files'):
-    #     for filename in files:
-    #         html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
-    #             link = f'{request.url._url}/{filename}',
-    #             title = filename,
-    #             filesize = f'{os.path.getsize(os.path.join(root, filename)) / 1024 / 1024:.2f}MB'
-    #         )
-
-    return HTMLResponse(get_files('files')) # Not user 'files', check dir(request) instead.
-
-def get_files(path, req_url) -> str:
-    html = f"Founded {len(next(os.walk(path))[2])} files:<br><br>"
-    # for root, dirs, files in os.walk('files'):
-    #     for filename in files:
-    #         html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
-    #             link = f'{request.url._url}/{filename}',
-    #             title = filename,
-    #             filesize = f'{os.path.getsize(os.path.join(root, filename)) / 1024 / 1024:.2f}MB'
-    #         )
-    for dirname in filter(lambda dir: os.path.isdir(dirname), os.listdir(path)):
-            html += '<a href=\"{link}\">{title}/</a><br>'.format(
-                link = f'{req_url}/{dirname}',
+async def get_files(path, req_url) -> str:
+    path = f'files{path}/'
+    html = f"Founded {len(next(os.walk(path))[1])} dirs, {len(next(os.walk(path))[2])} files:<br><br>"
+    for dirname in filter(lambda xpath: os.path.isdir(path + xpath), os.listdir(path)):
+            html += '• <a href=\"{link}\">{title}/</a><br>'.format(
+                link = f"{req_url}{'/' if req_url[-1] != '/' else ''}{dirname}",
                 title = dirname
             )
-    for filename in filter(lambda dir: os.path.isfile(filename), os.listdir(path)):
+    html += '<br>'
+    for filename in filter(lambda xpath: os.path.isfile(path + xpath), os.listdir(path)):
             html += '<a href=\"{link}\">{title}</a>  {filesize}<br>'.format(
-                link = f'{req_url}/{filename}',
+                link = f"{req_url}{'/' if req_url[-1] != '/' else ''}{filename}",
                 title = filename,
                 filesize = f'{os.path.getsize(os.path.join(path, filename)) / 1024 / 1024:.2f}MB'
             )
     return html
 
-
-@app.get('/files/{file}')
-async def get_file(file: str, request: Request):
-    if os.path.isdir(f'{request.url._url}/{file}'):
-        pass
+@app.get('/files{file_path:path}')
+async def get_file(file_path: str, request: Request):
+    file_path = '' if file_path == '/' else file_path
+    if os.path.isdir(f'files/{file_path}'):
+        return HTMLResponse(await get_files(file_path, request.url._url))
     else:
-        if os.path.exists(f'files/{file}'):
-            return FileResponse(f'files/{file}')
+        if os.path.exists(f'files/{file_path}'):
+            return FileResponse(f'files/{file_path}')
         else:
            return PlainTextResponse('403 Forbidden.')
